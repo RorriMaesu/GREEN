@@ -1,7 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
-
-// GeminiService.js
-// This service handles interactions with Gemini API for weather data and garden recommendations
+import * as genai from "@google/genai";
 
 /**
  * GeminiService provides methods to interact with Google's Gemini API
@@ -33,7 +30,7 @@ export default class GeminiService {
       
       try {
         // Initialize with the new GoogleGenAI constructor
-        this.genAI = new GoogleGenAI({ apiKey: this.apiKey });
+        this.genAI = new genai.GoogleGenAI({ apiKey: this.apiKey });
         
         // Get the Gemini 2.5 Pro Preview model
         this.model = this.genAI.models.getGenerativeModel({
