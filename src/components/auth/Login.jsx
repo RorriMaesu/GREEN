@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -28,16 +28,33 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [authDomainError, setAuthDomainError] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
+
+  // Check if we're on GitHub Pages
+  const isGitHubPages = window.location.hostname.includes('github.io');
+
+  useEffect(() => {
+    // On component mount, check if there's a domain error in localStorage
+    // This helps persist the error message across redirects
+    const storedError = localStorage.getItem('auth_domain_error');
+    if (storedError) {
+      setAuthDomainError(true);
+      setError(storedError);
+      // Clear the stored error
+      localStorage.removeItem('auth_domain_error');
+    }
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     try {
       setError('');
+      setAuthDomainError(false);
       setLoading(true);
       await login(email, password);
       navigate('/');
@@ -52,8 +69,21 @@ export default function Login() {
   async function handleGoogleLogin() {
     try {
       setError('');
+      setAuthDomainError(false);
       setLoading(true);
-      await loginWithGoogle();
+
+      const result = await loginWithGoogle();
+
+      if (!result.success) {
+        if (result.error && result.error.includes('not authorized for Firebase Authentication')) {
+          setAuthDomainError(true);
+          // Store the error in localStorage in case of redirect
+          localStorage.setItem('auth_domain_error', result.error);
+        }
+        setError(result.error || 'Failed to log in with Google.');
+        return;
+      }
+
       navigate('/');
     } catch (error) {
       setError('Failed to log in with Google.');
@@ -162,7 +192,34 @@ export default function Login() {
                 </Typography>
               </Box>
 
-              {error && (
+              {authDomainError && (
+                <AnimatedSection animation="fadeIn">
+                  <Alert
+                    severity="warning"
+                    sx={{
+                      mb: 3,
+                      borderRadius: 2,
+                      boxShadow: '0 4px 12px rgba(237, 108, 2, 0.1)'
+                    }}
+                  >
+                    <Typography variant="body2">
+                      <strong>Authorization Error:</strong> This domain is not authorized for Firebase Authentication.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      To fix this:
+                      <ul style={{ marginTop: 4, marginBottom: 4, paddingLeft: 20 }}>
+                        <li>Go to Firebase Console → Authentication → Settings</li>
+                        <li>Add "{window.location.hostname}" to Authorized Domains</li>
+                      </ul>
+                    </Typography>
+                    <Typography variant="body2">
+                      For testing, please use the regular login with email and password or use the application on the authorized domain.
+                    </Typography>
+                  </Alert>
+                </AnimatedSection>
+              )}
+
+              {error && !authDomainError && (
                 <AnimatedSection animation="fadeIn">
                   <Alert
                     severity="error"
@@ -271,6 +328,15 @@ export default function Login() {
                     Sign In with Google
                   </Button>
                 </AnimatedElement>
+
+                {isGitHubPages && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+                      Note: You're using this app on GitHub Pages ({window.location.hostname}).
+                      <br />Google login requires domain authorization in Firebase.
+                    </Typography>
+                  </Box>
+                )}
 
                 <Box sx={{ mt: 3, textAlign: 'center' }}>
                   <motion.div

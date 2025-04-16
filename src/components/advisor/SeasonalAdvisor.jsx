@@ -30,7 +30,8 @@ import {
   ThermostatAuto as TemperatureIcon,
   WbSunny as SunIcon,
   Close as CloseIcon,
-  SmartToy as SmartToyIcon
+  SmartToy as SmartToyIcon,
+  Psychology as AIIcon  // Adding Psychology icon as AIIcon alternative
 } from '@mui/icons-material';
 import { winstonClimateData } from '../../data/winstonClimateData';
 import { winstonPlants } from '../../data/winstonPlants';

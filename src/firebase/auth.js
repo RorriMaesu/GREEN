@@ -7,6 +7,8 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged
 } from 'firebase/auth';
 import { initializeFirestore } from './initFirestore';
@@ -51,6 +53,57 @@ export const signInWithGoogle = async () => {
     
     return { success: true, user };
   } catch (error) {
+    console.error('Error in Google login:', error);
+    
+    // Check if the error is due to unauthorized domain
+    if (error.code === 'auth/unauthorized-domain') {
+      const currentDomain = window.location.hostname;
+      console.warn(`The current domain (${currentDomain}) is not authorized for Firebase Authentication. 
+      Please add it to the authorized domains list in the Firebase console.`);
+      
+      // Return more helpful error message for unauthorized domain
+      return { 
+        success: false, 
+        error: `This domain (${currentDomain}) is not authorized for Firebase Authentication. 
+        If you're the developer, please add it to your Firebase console under Authentication > Settings > Authorized domains.` 
+      };
+    }
+    
+    return { success: false, error: error.message };
+  }
+};
+
+// Alternative sign-in method using redirect (may work better in some environments)
+export const signInWithGoogleRedirect = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithRedirect(auth, provider);
+    return { success: true }; // Note: The actual result will be handled by getRedirectResult
+  } catch (error) {
+    console.error('Error in Google redirect login:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Handle redirect result
+export const handleRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result) {
+      const user = result.user;
+      await initializeFirestore(user.uid);
+      return { success: true, user };
+    }
+    return { success: true, user: null }; // No redirect result
+  } catch (error) {
+    console.error('Error in handling redirect result:', error);
+    
+    // Check if the error is due to unauthorized domain
+    if (error.code === 'auth/unauthorized-domain') {
+      const currentDomain = window.location.hostname;
+      console.warn(`The current domain (${currentDomain}) is not authorized for Firebase Authentication.`);
+    }
+    
     return { success: false, error: error.message };
   }
 };
