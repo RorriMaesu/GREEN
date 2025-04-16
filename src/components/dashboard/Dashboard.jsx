@@ -33,7 +33,8 @@ import {
   CheckCircleOutline as CheckIcon,
   Nature as EcoIcon,
   Opacity as OpacityIcon,
-  WbSunny as SunIcon
+  WbSunny as SunIcon,
+  Psychology as AIIcon  // Adding Psychology icon as AIIcon alternative
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import AnimatedSection from '../animations/AnimatedSection';
