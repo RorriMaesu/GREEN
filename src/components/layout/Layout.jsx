@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import NotificationAlert from '../notifications/NotificationAlert';
 import AnimatedSection from '../animations/AnimatedSection';
+import ChatButton from '../chat/ChatButton';
 
 // Animation variants for page transitions
 const pageVariants = {
@@ -39,6 +40,8 @@ export default function Layout({ children }) {
     }}>
       <Navbar />
       <NotificationAlert />
+      {/* Chat button for garden assistant */}
+      <ChatButton />
 
       <Container
         component="main"

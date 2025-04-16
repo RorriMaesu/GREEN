@@ -38,6 +38,7 @@ import { winstonPlants } from '../../data/winstonPlants';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import GeminiService from '../../services/GeminiService';
+import GardenGPT from './GardenGPT';
 
 export default function SeasonalAdvisor() {
   const [currentMonth, setCurrentMonth] = useState('');
@@ -332,6 +333,9 @@ export default function SeasonalAdvisor() {
 
   return (
     <Box sx={{ mb: 4 }}>
+      {/* Gemini-powered Garden Chat Assistant */}
+      <GardenGPT />
+      
       {error && alertOpen && (
         <Alert 
           severity="info" 

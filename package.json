@@ -20,6 +20,7 @@
     "@firebase/firestore": "^4.7.10",
     "@firebase/messaging": "^0.12.17",
     "@firebase/storage": "^0.13.7",
+    "@google/genai": "^0.8.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
     "date-fns": "^4.1.0",
