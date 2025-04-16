@@ -46,7 +46,8 @@ import {
   Language as LanguageIcon,
   Brush as ThemeIcon,
   Save as SaveIcon,
-  SmartToy as SmartToyIcon
+  SmartToy as SmartToyIcon,
+  Psychology as AIIcon  // Adding Psychology icon as AIIcon alternative
 } from '@mui/icons-material';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { updateProfile, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from 'firebase/auth';
