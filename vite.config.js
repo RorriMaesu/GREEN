@@ -10,12 +10,21 @@ export default defineConfig({
     assetsDir: 'assets',
     // Generate source maps for better debugging
     sourcemap: true,
-    // Remove console logs in production
+    // Optimize for production
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,
       },
     },
+    // Generate a _redirects file for SPA navigation
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+        }
+      }
+    }
   },
 })
