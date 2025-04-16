@@ -29,11 +29,11 @@ export default class GeminiService {
       }
       
       try {
-        // Initialize the GenAI instance with the API key
-        genai.configure({ apiKey: this.apiKey });
+        // Initialize with API key in the format compatible with v0.8.0
+        this.genAI = new genai.GoogleGenerativeAI(this.apiKey);
         
-        // Set up the Gemini Pro model (v0.8.0 format)
-        this.model = genai.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
+        // Get the Gemini 2.5 Pro Preview model (v0.8.0 format)
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
         
         // Test the model with a simple prompt to verify the API key works
         const result = await this.model.generateContent("Hello, are you working?");
