@@ -29,16 +29,14 @@ export default class GeminiService {
       }
       
       try {
-        // Initialize with the new GoogleGenAI constructor
-        this.genAI = new genai.GoogleGenAI({ apiKey: this.apiKey });
+        // Initialize the GenAI instance with the API key
+        genai.configure({ apiKey: this.apiKey });
         
-        // Get the Gemini 2.5 Pro Preview model
-        this.model = this.genAI.models.getGenerativeModel({
-          model: "gemini-2.5-pro-preview-03-25"
-        });
+        // Set up the Gemini Pro model (v0.8.0 format)
+        this.model = genai.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
         
         // Test the model with a simple prompt to verify the API key works
-        const response = await this.model.generateContent("Hello, are you working?");
+        const result = await this.model.generateContent("Hello, are you working?");
         
         // If we get here, initialization was successful
         this._initialized = true;
@@ -121,12 +119,11 @@ export default class GeminiService {
           Make realistic estimates based on the season if exact data isn't available.
         `;
 
-        const result = await this.model.generateContent({
-          contents: prompt
-        });
+        // Call generateContent with the prompt and updated for version 0.8.0
+        const result = await this.model.generateContent(prompt);
         
-        // Updated for new API response format
-        const text = result.response.text();
+        // Get the text response using the v0.8.0 API format
+        const text = result.text;
         
         // Try to parse the JSON response
         try {
@@ -233,8 +230,9 @@ export default class GeminiService {
         `;
 
         const result = await this.model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        
+        // Use the v0.8.0 API response format
+        const text = result.text;
         
         // Try to parse the JSON response
         try {
@@ -376,9 +374,9 @@ export default class GeminiService {
 
       // Use the model directly instead of chat API
       const result = await this.model.generateContent(fullPrompt);
-      const response = result.text();
       
-      return response;
+      // Return the text using the v0.8.0 API format
+      return result.text;
     } catch (error) {
       console.error('Error in chat conversation:', error);
       return "I'm sorry, I encountered an error while processing your question. Please try again later or check your Gemini API key.";
