@@ -1,3 +1,5 @@
+import { GoogleGenAI } from "@google/genai";
+
 // GeminiService.js
 // This service handles interactions with Gemini API for weather data and garden recommendations
 
@@ -30,24 +32,16 @@ export default class GeminiService {
       }
       
       try {
-        // Dynamically import the Google Generative AI package
-        // This prevents build-time errors while still allowing runtime functionality
-        const genaiModule = await import('@google/genai');
+        // Initialize with the new GoogleGenAI constructor
+        this.genAI = new GoogleGenAI({ apiKey: this.apiKey });
         
-        // For version 0.8.0, we need to use a different initialization approach
-        if (!genaiModule || typeof genaiModule.GoogleGenerativeAI !== 'function') {
-          console.warn('Google Generative AI module loaded but GoogleGenerativeAI class not found');
-          return this._initializeFallback();
-        }
-        
-        // Initialize the Google Generative AI client using the correct SDK format for @google/genai v0.8.0
-        this.genAI = new genaiModule.GoogleGenerativeAI(this.apiKey);
-        
-        // Get the Gemini model - use a model name that exists in the current version
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+        // Get the Gemini 2.5 Pro Preview model
+        this.model = this.genAI.models.getGenerativeModel({
+          model: "gemini-2.5-pro-preview-03-25"
+        });
         
         // Test the model with a simple prompt to verify the API key works
-        const result = await this.model.generateContent("Hello, are you working?");
+        const response = await this.model.generateContent("Hello, are you working?");
         
         // If we get here, initialization was successful
         this._initialized = true;
@@ -130,8 +124,11 @@ export default class GeminiService {
           Make realistic estimates based on the season if exact data isn't available.
         `;
 
-        const result = await this.model.generateContent(prompt);
-        // Updated for v0.8.0 API response format
+        const result = await this.model.generateContent({
+          contents: prompt
+        });
+        
+        // Updated for new API response format
         const text = result.response.text();
         
         // Try to parse the JSON response

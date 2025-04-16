@@ -60,7 +60,7 @@ export default function GardenGPT({ inDialog = false }) {
   const initialMessages = [
     {
       sender: 'bot',
-      text: 'Hello! I\'m your Winston, Oregon gardening assistant powered by Google Gemini Pro 2.5. Ask me anything about gardening in your specific climate zone (8b/9a).'
+      text: 'Hello! I\'m your Winston, Oregon gardening assistant powered by Google Gemini 2.5 Pro Preview. Ask me anything about gardening in your specific climate zone (8b/9a).'
     },
     {
       sender: 'bot',
