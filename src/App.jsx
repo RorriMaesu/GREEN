@@ -13,7 +13,8 @@ import TaskDetail from './components/tasks/TaskDetail';
 import PlantDetail from './components/plants/PlantDetail';
 import Settings from './components/settings/Settings';
 
-// Theme is now defined in theme.js and provided in main.jsx
+// Determine the base URL based on environment
+const basename = import.meta.env.MODE === 'production' ? '/GREEN' : '/';
 
 // Private route component
 function PrivateRoute({ children }) {
@@ -24,7 +25,7 @@ function PrivateRoute({ children }) {
 
 function App() {
   return (
-    <Router>
+    <Router basename={basename}>
       <AuthProvider>
         <NotificationProvider>
           <GardenProvider>
