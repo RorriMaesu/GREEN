@@ -32,19 +32,19 @@ export default class GeminiService {
       try {
         // Dynamically import the Google Generative AI package
         // This prevents build-time errors while still allowing runtime functionality
-        const module = await import('@google/genai');
+        const genaiModule = await import('@google/genai');
         
-        if (!module || !module.GoogleGenerativeAI) {
+        // For version 0.8.0, we need to use a different initialization approach
+        if (!genaiModule || typeof genaiModule.GoogleGenerativeAI !== 'function') {
           console.warn('Google Generative AI module loaded but GoogleGenerativeAI class not found');
           return this._initializeFallback();
         }
         
-        // Initialize the Google Generative AI client using the correct SDK format
-        const { GoogleGenerativeAI } = module;
-        this.genAI = new GoogleGenerativeAI(this.apiKey);
+        // Initialize the Google Generative AI client using the correct SDK format for @google/genai v0.8.0
+        this.genAI = new genaiModule.GoogleGenerativeAI(this.apiKey);
         
-        // Get the Gemini model - use the exact name from documentation
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        // Get the Gemini model - use a model name that exists in the current version
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
         
         // Test the model with a simple prompt to verify the API key works
         const result = await this.model.generateContent("Hello, are you working?");
@@ -131,7 +131,8 @@ export default class GeminiService {
         `;
 
         const result = await this.model.generateContent(prompt);
-        const text = result.text();
+        // Updated for v0.8.0 API response format
+        const text = result.response.text();
         
         // Try to parse the JSON response
         try {
@@ -238,7 +239,8 @@ export default class GeminiService {
         `;
 
         const result = await this.model.generateContent(prompt);
-        const text = result.text();
+        const response = await result.response;
+        const text = response.text();
         
         // Try to parse the JSON response
         try {
