@@ -1,6 +1,5 @@
 // GeminiService.js
 // This service handles interactions with Gemini API for weather data and garden recommendations
-import { GoogleGenerativeAI } from "@google/genai";
 
 /**
  * GeminiService provides methods to interact with Google's Gemini API
@@ -31,7 +30,17 @@ export default class GeminiService {
       }
       
       try {
+        // Dynamically import the Google Generative AI package
+        // This prevents build-time errors while still allowing runtime functionality
+        const genaiModule = await import('@google/genai');
+        
+        if (!genaiModule || !genaiModule.GoogleGenerativeAI) {
+          console.warn('Google Generative AI module loaded but GoogleGenerativeAI class not found');
+          return this._initializeFallback();
+        }
+        
         // Initialize the Google Generative AI client
+        const GoogleGenerativeAI = genaiModule.GoogleGenerativeAI;
         this.genAI = new GoogleGenerativeAI(this.apiKey);
         
         // Get the Gemini Pro 2.5 model
@@ -47,16 +56,24 @@ export default class GeminiService {
         return true;
       } catch (innerError) {
         console.error('Failed to initialize Gemini API client:', innerError);
-        // If we reach here, there was an error with the API integration
-        // but we'll still return true to allow the app to function with simulated data
-        this._initialized = false;
-        return false;
+        // Fall back to simulated data
+        return this._initializeFallback();
       }
     } catch (error) {
       console.error('Failed to initialize Gemini service:', error);
-      this._initialized = false;
-      return false;
+      return this._initializeFallback();
     }
+  }
+  
+  /**
+   * Initialize a fallback service when Gemini API isn't available
+   * @returns {boolean} Always returns false to indicate real API isn't available
+   * @private
+   */
+  _initializeFallback() {
+    console.warn('Using fallback simulation instead of Gemini API');
+    this._initialized = false;
+    return false;
   }
 
   /**
