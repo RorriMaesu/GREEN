@@ -13,11 +13,11 @@ function githubPagesAssetPathsPlugin() {
         return html;
       }
       
-      // Replace asset paths in the HTML file
+      // Replace asset paths in the HTML file to use relative paths
       return html
-        .replace(/src="\//g, 'src="/')
-        .replace(/href="\//g, 'href="/')
-        .replace(/<script type="module" crossorigin src="\//g, '<script type="module" crossorigin src="./');
+        .replace(/src="\/GREEN\//g, 'src="./')
+        .replace(/href="\/GREEN\//g, 'href="./')
+        .replace(/<script type="module" crossorigin src="\/GREEN\//g, '<script type="module" crossorigin src="./');
     }
   }
 }
@@ -30,6 +30,8 @@ export default defineConfig({
   ],
   base: '/GREEN/',
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html')

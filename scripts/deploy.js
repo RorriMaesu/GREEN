@@ -44,6 +44,31 @@ try {
   // Debug: List the contents of the dist directory
   console.log('Dist directory contents:');
   execSync(`dir "${distDir}"`, { stdio: 'inherit' });
+  
+  // Additional step: List contents of assets directory to verify paths
+  console.log('Assets directory contents:');
+  try {
+    execSync(`dir "${path.join(distDir, 'assets')}"`, { stdio: 'inherit' });
+  } catch (error) {
+    console.warn('⚠️ Warning: Could not list assets directory:', error.message);
+  }
+
+  // Fix asset references in index.html
+  console.log('Fixing asset references in index.html...');
+  const indexPath = path.join(distDir, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    let indexContent = fs.readFileSync(indexPath, 'utf8');
+    // Fix any double GREEN references
+    indexContent = indexContent.replace(/\/GREEN\/GREEN\//g, '/GREEN/');
+    // Ensure paths use relative references
+    indexContent = indexContent.replace(/src="\/GREEN\//g, 'src="./');
+    indexContent = indexContent.replace(/href="\/GREEN\//g, 'href="./');
+    // Save the fixed index.html
+    fs.writeFileSync(indexPath, indexContent);
+    console.log('✅ Fixed asset references in index.html');
+  } else {
+    console.warn('⚠️ Warning: index.html not found in dist directory');
+  }
 
   // Ensure 404.html exists in the dist directory
   if (fs.existsSync(path.join(rootDir, 'public', '404.html'))) {
