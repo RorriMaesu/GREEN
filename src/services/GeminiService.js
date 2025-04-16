@@ -29,14 +29,14 @@ export default class GeminiService {
       }
       
       try {
-        // Use the v0.8.0 format for initialization
-        this.genAI = new genai.GenerativeModel({
-          model: "gemini-2.5-pro-preview-03-25",
-          apiKey: this.apiKey
-        });
+        // Use the v0.8.0 format for initialization with GoogleGenAI
+        this.genAI = new genai.GoogleGenAI(this.apiKey);
+        
+        // Get the model for Gemini 2.5 Pro Preview
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
         
         // Test the model with a simple prompt to verify the API key works
-        const result = await this.genAI.generateContent("Hello, are you working?");
+        const result = await this.model.generateContent("Hello, are you working?");
         
         // If we get here, initialization was successful
         this._initialized = true;
@@ -61,7 +61,7 @@ export default class GeminiService {
    */
   async generatePrompt(prompt) {
     try {
-      const result = await this.genAI.generateContent(prompt);
+      const result = await this.model.generateContent(prompt);
       return result || '';
     } catch (error) {
       console.error('Error generating prompt:', error);
