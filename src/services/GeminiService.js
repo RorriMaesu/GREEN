@@ -1,6 +1,6 @@
 // GeminiService.js
 // This service handles interactions with Gemini API for weather data and garden recommendations
-import { GoogleGenerativeAI } from "@google/genai/dist";
+import { GoogleGenerativeAI } from "@google/genai";
 
 /**
  * GeminiService provides methods to interact with Google's Gemini API
@@ -30,20 +30,28 @@ export default class GeminiService {
         throw new Error('Invalid API key format');
       }
       
-      // Initialize the Google Generative AI client
-      this.genAI = new GoogleGenerativeAI(this.apiKey);
-      
-      // Get the Gemini Pro 2.5 model
-      this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-      
-      // Test the model with a simple prompt to verify the API key works
-      const result = await this.model.generateContent("Hello, are you working?");
-      const response = await result.response;
-      
-      // If we get here, initialization was successful
-      this._initialized = true;
-      console.log("Gemini Pro 2.5 initialized successfully");
-      return true;
+      try {
+        // Initialize the Google Generative AI client
+        this.genAI = new GoogleGenerativeAI(this.apiKey);
+        
+        // Get the Gemini Pro 2.5 model
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        
+        // Test the model with a simple prompt to verify the API key works
+        const result = await this.model.generateContent("Hello, are you working?");
+        const response = await result.response;
+        
+        // If we get here, initialization was successful
+        this._initialized = true;
+        console.log("Gemini Pro 2.5 initialized successfully");
+        return true;
+      } catch (innerError) {
+        console.error('Failed to initialize Gemini API client:', innerError);
+        // If we reach here, there was an error with the API integration
+        // but we'll still return true to allow the app to function with simulated data
+        this._initialized = false;
+        return false;
+      }
     } catch (error) {
       console.error('Failed to initialize Gemini service:', error);
       this._initialized = false;
