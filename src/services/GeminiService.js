@@ -32,28 +32,26 @@ export default class GeminiService {
       try {
         // Dynamically import the Google Generative AI package
         // This prevents build-time errors while still allowing runtime functionality
-        const GenAIModule = await import('@google/genai');
+        const module = await import('@google/genai');
         
-        if (!GenAIModule || !GenAIModule.GoogleGenAI) {
-          console.warn('Google Generative AI module loaded but GoogleGenAI class not found');
+        if (!module || !module.GoogleGenerativeAI) {
+          console.warn('Google Generative AI module loaded but GoogleGenerativeAI class not found');
           return this._initializeFallback();
         }
         
-        // Initialize the Google Generative AI client using the new SDK format
-        const GoogleGenAI = GenAIModule.GoogleGenAI;
-        this.genAI = new GoogleGenAI({ apiKey: this.apiKey });
+        // Initialize the Google Generative AI client using the correct SDK format
+        const { GoogleGenerativeAI } = module;
+        this.genAI = new GoogleGenerativeAI(this.apiKey);
         
-        // Get the Gemini 2.5 Pro model
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+        // Get the Gemini model - use the exact name from documentation
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         
         // Test the model with a simple prompt to verify the API key works
-        const response = await this.model.generateContent({
-          contents: "Hello, are you working?",
-        });
+        const result = await this.model.generateContent("Hello, are you working?");
         
         // If we get here, initialization was successful
         this._initialized = true;
-        console.log("Gemini 2.5 Pro initialized successfully");
+        console.log("Gemini AI initialized successfully");
         return true;
       } catch (innerError) {
         console.error('Failed to initialize Gemini API client:', innerError);
@@ -132,16 +130,14 @@ export default class GeminiService {
           Make realistic estimates based on the season if exact data isn't available.
         `;
 
-        const result = await this.model.generateContent({
-          contents: prompt
-        });
-        const text = result.response.text();
+        const result = await this.model.generateContent(prompt);
+        const text = result.text();
         
         // Try to parse the JSON response
         try {
           const weatherData = JSON.parse(text);
           weatherData.fetchedAt = new Date().toISOString();
-          weatherData.source = 'Gemini 2.5 Pro AI';
+          weatherData.source = 'Gemini AI';
           return weatherData;
         } catch (parseError) {
           console.warn('Failed to parse Gemini weather response as JSON:', parseError);
@@ -241,16 +237,14 @@ export default class GeminiService {
           Use the current conditions to provide specific, actionable advice.
         `;
 
-        const result = await this.model.generateContent({
-          contents: prompt
-        });
-        const text = result.response.text();
+        const result = await this.model.generateContent(prompt);
+        const text = result.text();
         
         // Try to parse the JSON response
         try {
           const recommendations = JSON.parse(text);
           recommendations.generatedAt = new Date().toISOString();
-          recommendations.source = 'Gemini 2.5 Pro AI';
+          recommendations.source = 'Gemini AI';
           return recommendations;
         } catch (parseError) {
           console.warn('Failed to parse Gemini recommendations as JSON:', parseError);
@@ -351,8 +345,8 @@ export default class GeminiService {
         'Winter': 'Winter in Winston (December-February): Mild winters allow some year-round growing. Cover crops and planning are key activities.'
       };
 
-      // Build comprehensive system prompt with all context
-      const systemInstruction = `
+      // Build full prompt with context and user's question
+      const fullPrompt = `
         You are GardenAI, a helpful gardening assistant specialized for Winston, Oregon (USDA growing zone 8b/9a).
         Today is ${currentMonth} ${date}, ${now.getFullYear()}, and we are in ${currentSeason}.
         
@@ -380,26 +374,15 @@ export default class GeminiService {
         If the user asks about adding new plants, suggest varieties that would do well in their specific garden areas.
         If they ask about problems, provide diagnosis and organic solutions when possible.
         Keep responses concise (under 250 words) unless the user asks for detailed information.
+        
+        USER QUESTION: ${userMessage}
       `;
 
-      // Create a chat object to hold the conversation
-      const chat = this.genAI.chats.create({
-        model: "gemini-2.5-pro",
-        systemInstruction: systemInstruction,
-        config: {
-          temperature: 0.7,
-          topP: 0.95,
-          topK: 40,
-        },
-        history: []
-      });
-
-      // Send the user's message and get the response
-      const response = await chat.sendMessage({
-        message: userMessage
-      });
+      // Use the model directly instead of chat API
+      const result = await this.model.generateContent(fullPrompt);
+      const response = result.text();
       
-      return response.text;
+      return response;
     } catch (error) {
       console.error('Error in chat conversation:', error);
       return "I'm sorry, I encountered an error while processing your question. Please try again later or check your Gemini API key.";
