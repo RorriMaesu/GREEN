@@ -29,14 +29,14 @@ export default class GeminiService {
       }
       
       try {
-        // Initialize with API key in the format compatible with v0.8.0
-        this.genAI = new genai.GoogleGenerativeAI(this.apiKey);
-        
-        // Get the Gemini 2.5 Pro Preview model (v0.8.0 format)
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
+        // Use the v0.8.0 format for initialization
+        this.genAI = new genai.GenerativeModel({
+          model: "gemini-2.5-pro-preview-03-25",
+          apiKey: this.apiKey
+        });
         
         // Test the model with a simple prompt to verify the API key works
-        const result = await this.model.generateContent("Hello, are you working?");
+        const result = await this.genAI.generateContent("Hello, are you working?");
         
         // If we get here, initialization was successful
         this._initialized = true;
@@ -53,6 +53,22 @@ export default class GeminiService {
     }
   }
   
+  /**
+   * Helper method to generate content from a prompt
+   * @param {string} prompt - The prompt to send to the model
+   * @returns {Promise<string>} The generated text response
+   * @private
+   */
+  async generatePrompt(prompt) {
+    try {
+      const result = await this.genAI.generateContent(prompt);
+      return result || '';
+    } catch (error) {
+      console.error('Error generating prompt:', error);
+      throw error;
+    }
+  }
+
   /**
    * Initialize a fallback service when Gemini API isn't available
    * @returns {boolean} Always returns false to indicate real API isn't available
@@ -119,11 +135,8 @@ export default class GeminiService {
           Make realistic estimates based on the season if exact data isn't available.
         `;
 
-        // Call generateContent with the prompt and updated for version 0.8.0
-        const result = await this.model.generateContent(prompt);
-        
-        // Get the text response using the v0.8.0 API format
-        const text = result.text;
+        // Call generatePrompt with the prompt
+        const text = await this.generatePrompt(prompt);
         
         // Try to parse the JSON response
         try {
@@ -229,10 +242,7 @@ export default class GeminiService {
           Use the current conditions to provide specific, actionable advice.
         `;
 
-        const result = await this.model.generateContent(prompt);
-        
-        // Use the v0.8.0 API response format
-        const text = result.text;
+        const text = await this.generatePrompt(prompt);
         
         // Try to parse the JSON response
         try {
@@ -373,10 +383,10 @@ export default class GeminiService {
       `;
 
       // Use the model directly instead of chat API
-      const result = await this.model.generateContent(fullPrompt);
+      const text = await this.generatePrompt(fullPrompt);
       
-      // Return the text using the v0.8.0 API format
-      return result.text;
+      // Return the text
+      return text;
     } catch (error) {
       console.error('Error in chat conversation:', error);
       return "I'm sorry, I encountered an error while processing your question. Please try again later or check your Gemini API key.";
