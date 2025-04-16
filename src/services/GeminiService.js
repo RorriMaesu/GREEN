@@ -373,7 +373,7 @@ export default class GeminiService {
       {
         indoor: ['Fall/winter vegetables'],
         outdoor: ['Succession plantings of beans', 'Fall peas', 'Fall root crops'],
-        avoid: ['Planting varieties that won't mature before frost']
+        avoid: ['Planting varieties that won\'t mature before frost']
       },
       // August
       {
@@ -395,7 +395,7 @@ export default class GeminiService {
       },
       // November
       {
-        indoor: ['Planning next year's garden'],
+        indoor: ['Planning next year\'s garden'],
         outdoor: ['Last chance for garlic', 'Bare-root trees (late month)'],
         avoid: ['Most plantings']
       },
