@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>reCAPTCHA Example</title>
+  <!-- Google reCAPTCHA -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+  <h1>reCAPTCHA Example</h1>
+  
+  <form id="demo-form">
+    <div class="g-recaptcha" data-sitekey="6LfMmGIrAAAAAA5Gw7S5Dv-8Bv-shVNNIszLdh"></div>
+    <br/>
+    <input type="submit" value="Submit">
+  </form>
+  
+  <script>
+    // Function to handle form submission
+    document.getElementById('demo-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      // Get the reCAPTCHA response
+      const recaptchaResponse = grecaptcha.getResponse();
+      
+      if (!recaptchaResponse) {
+        alert('Please complete the reCAPTCHA');
+        return;
+      }
+      
+      // Here you would send the recaptchaResponse to your server or Vertex AI
+      console.log('reCAPTCHA response:', recaptchaResponse);
+      
+      // Example of how you might use this with Vertex AI/Gemini
+      // In a real application, you would send this to your backend
+      // which would verify it before making Vertex AI calls
+      /*
+      const verifyRecaptcha = async (token) => {
+        try {
+          const response = await fetch('/api/verify-recaptcha', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token }),
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            // Now it's safe to use Vertex AI/Gemini
+            // Call your Gemini API functions here
+          } else {
+            alert('reCAPTCHA verification failed');
+          }
+        } catch (error) {
+          console.error('Error verifying reCAPTCHA:', error);
+        }
+      };
+      
+      verifyRecaptcha(recaptchaResponse);
+      */
+      
+      // Reset the reCAPTCHA
+      grecaptcha.reset();
+    });
+  </script>
+</body>
+</html>
